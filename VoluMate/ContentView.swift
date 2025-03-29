@@ -11,12 +11,16 @@ struct ContentView: View {
     @State private var chosenUnit = "mL"
     @State private var chosenVolume = 100
     
+    @FocusState private var isVolumeFocused: Bool
+    
     private let units = ["mL", "L", "gal", "qt", "pt", "cup"]
     var outputUnits: [String] {
         units.filter { $0 != chosenUnit }
     }
     
     func convert(_ volume: Double, from inputUnit: String, to outputUnit: String) -> Double {
+        
+        guard !volume.isNaN, !volume.isInfinite else { return 0 }
         
         let baseValue: Double
         
@@ -46,7 +50,8 @@ struct ContentView: View {
             Form {
                 Section("Enter the parameters") {
                     TextField("Volume", value: $chosenVolume, format: .number)
-                        .keyboardType(.decimalPad)
+                        .keyboardType(.numberPad)
+                        .focused($isVolumeFocused)
                     Picker("Choosing a unit", selection: $chosenUnit){
                         ForEach(units, id: \.self){
                             Text("\($0) unit")
@@ -60,6 +65,13 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("VoluMate")
+            .toolbar{
+                if isVolumeFocused{
+                    Button("Done"){
+                        isVolumeFocused = false
+                    }
+                }
+            }
         }
     }
 }
